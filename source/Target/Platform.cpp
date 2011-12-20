@@ -572,6 +572,16 @@ Platform::DebugProcess (ProcessLaunchInfo &launch_info,
                         Error &error)
 {
     ProcessSP process_sp;
+
+    launch_info.GetFlags ().Set (eLaunchFlagDebug);
+    const char *plugin_name = launch_info.GetProcessPluginName();
+    process_sp = target->CreateProcess (listener, plugin_name).get();
+    error = process_sp->Launch (launch_info);
+    return process_sp;
+
+
+#if 0
+    ProcessSP process_sp;
     // Make sure we stop at the entry point
     launch_info.GetFlags ().Set (eLaunchFlagDebug);
     error = LaunchProcess (launch_info);
@@ -602,4 +612,5 @@ Platform::DebugProcess (ProcessLaunchInfo &launch_info,
         }
     }
     return process_sp;
+#endif
 }

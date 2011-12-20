@@ -9,6 +9,7 @@
 
 // C Includes
 #include <stdio.h>
+#include <dlfcn.h>
 #include <execinfo.h>
 #include <sys/types.h>
 #include <sys/user.h>
@@ -34,6 +35,7 @@ extern "C" {
 
 using namespace lldb;
 using namespace lldb_private;
+
 
 class FreeBSDThread
 {
@@ -101,7 +103,7 @@ Host::GetEnvironment (StringList &env)
 {
     char *v;
     char **var = environ;
-    for (var = environ; var != NULL; ++var) {
+    for (; var != NULL && *var != NULL; ++var) {
         v = strchr(*var, (int)'-');
         if (v == NULL)
             continue;
@@ -168,16 +170,14 @@ GetFreeBSDProcessArgs (const ProcessInstanceInfoMatch *match_info_ptr,
                       ProcessInstanceInfo &process_info)
 {
     if (process_info.ProcessIDIsValid()) {
-        int mib[3] = { CTL_KERN, KERN_PROC_ARGS, process_info.GetProcessID() };
+        int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_ARGS, process_info.GetProcessID() };
 
         char arg_data[8192];
         size_t arg_data_size = sizeof(arg_data);
-        if (::sysctl (mib, 3, arg_data, &arg_data_size , NULL, 0) == 0)
+        if (::sysctl (mib, 4, arg_data, &arg_data_size , NULL, 0) == 0)
         {
             DataExtractor data (arg_data, arg_data_size, lldb::endian::InlHostByteOrder(), sizeof(void *));
             uint32_t offset = 0;
-            uint32_t start_offset;
-            uint32_t argc = data.GetU32 (&offset);
             const char *cstr;
             
             cstr = data.GetCStr (&offset);
@@ -185,32 +185,34 @@ GetFreeBSDProcessArgs (const ProcessInstanceInfoMatch *match_info_ptr,
             {
                 process_info.GetExecutableFile().SetFile(cstr, false);
 
-                if (match_info_ptr == NULL || 
+                if (!(match_info_ptr == NULL || 
                     NameMatches (process_info.GetExecutableFile().GetFilename().GetCString(),
                                  match_info_ptr->GetNameMatchType(),
-                                 match_info_ptr->GetProcessInfo().GetName()))
-                {
-                    // Skip NULLs
-                    while (1)
-                    {
-                        const uint8_t *p = data.PeekData(offset, 1);
-                        if ((p == NULL) || (*p != '\0'))
-                            break;
-                        ++offset;
-                    }
-                    // Now extract all arguments
-                    Args &proc_args = process_info.GetArguments();
-                    for (int i=0; i<argc; ++i)
-                    {
-                        start_offset = offset;
-                        cstr = data.GetCStr(&offset);
-                        if (cstr)
-                            proc_args.AppendArgument(cstr);
-                    }
-                    return true;
-                }
+                                 match_info_ptr->GetProcessInfo().GetName())))
+		    return false;
+		
+
+		Args &proc_args = process_info.GetArguments();
+		while (1)
+		{
+		    const uint8_t *p = data.PeekData(offset, 1);
+		    while ((p != NULL) && (*p == '\0') && offset < arg_data_size)
+		    {
+		        ++offset;
+			p = data.PeekData(offset, 1);
+		    }
+		    if (p == NULL || offset >= arg_data_size)
+		        return true;
+		    
+		    cstr = data.GetCStr(&offset);
+		    if (cstr)
+		        proc_args.AppendArgument(cstr);
+		    else
+		        return true;
+		}
+                
             }
-        }
+        } 
     }
     return false;
 }
@@ -219,8 +221,8 @@ static bool
 GetFreeBSDProcessCPUType (ProcessInstanceInfo &process_info)
 {
     if (process_info.ProcessIDIsValid()) {
-        // TODO: This
-        // return true;
+        process_info.GetArchitecture() = Host::GetArchitecture (Host::eSystemDefaultArchitecture);
+ 	return true;
     }
     process_info.GetArchitecture().Clear();
     return false;

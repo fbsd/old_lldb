@@ -89,7 +89,9 @@ endif
 
 ifeq ($(HOST_OS),FreeBSD)
   USEDLIBS += lldbHostFreeBSD.a \
-			  lldbPluginPlatformFreeBSD.a
+              lldbPluginDynamicLoaderLinux.a \
+              lldbPluginProcessFreeBSD.a \
+              lldbPluginPlatformFreeBSD.a
 endif
 
 include $(LEVEL)/Makefile.common

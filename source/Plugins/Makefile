@@ -33,4 +33,8 @@ ifeq ($(HOST_OS),Linux)
 DIRS += Process/Linux DynamicLoader/Linux-DYLD
 endif
 
+ifeq ($(HOST_OS),FreeBSD)
+DIRS += Process/FreeBSD DynamicLoader/Linux-DYLD
+endif
+
 include $(LLDB_LEVEL)/Makefile

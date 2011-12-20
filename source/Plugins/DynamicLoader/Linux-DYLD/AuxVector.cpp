@@ -8,9 +8,17 @@
 //===----------------------------------------------------------------------===//
 
 // C Includes
+extern "C" {
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifdef __FreeBSD__
+#include <sys/ptrace.h>
+#include <sys/sysctl.h>
+#include <sys/exec.h>
+#endif
+}
 
 // C++ Includes
 // Other libraries and framework includes
@@ -46,12 +54,61 @@ ParseAuxvEntry(DataExtractor &data, AuxVector::Entry &entry,
     return true;
 }
 
+#ifdef __FreeBSD__
+
+#include <machine/elf.h>
+DataBufferSP
+AuxVector::GetAuxvData()
+{
+   int mib[2] = { CTL_KERN, KERN_PS_STRINGS };
+   void *ps_strings_addr, *auxv_addr;
+   size_t ps_strings_size = sizeof(void *);
+   Elf_Auxinfo aux_info[AT_COUNT];
+   struct ps_strings ps_strings;
+   struct ptrace_io_desc pid;
+   DataBufferSP buf_sp;
+   std::auto_ptr<DataBufferHeap> buf_ap(new DataBufferHeap(1024, 0));
+
+   if (::sysctl(mib, 2, &ps_strings_addr, &ps_strings_size, NULL, 0) == 0) {
+	   pid.piod_op = PIOD_READ_D;
+	   pid.piod_addr = &ps_strings;
+	   pid.piod_offs = ps_strings_addr;
+	   pid.piod_len = sizeof(ps_strings);
+	   if (::ptrace(PT_IO, m_process->GetID(), (caddr_t)&pid, NULL)) {
+		   perror("failed to fetch ps_strings");
+		   buf_ap.release();
+		   goto done;
+	   }
+		   
+	   auxv_addr = ps_strings.ps_envstr + ps_strings.ps_nenvstr + 1;
+	   
+	   pid.piod_addr = aux_info;
+	   pid.piod_offs = auxv_addr;
+	   pid.piod_len = sizeof(aux_info);
+	   if (::ptrace(PT_IO, m_process->GetID(), (caddr_t)&pid, NULL)) {
+		   perror("failed to fetch aux_info");
+		   buf_ap.release();
+		   goto done;
+	   }
+	   memcpy(buf_ap->GetBytes(), aux_info, pid.piod_len);
+	   buf_sp.reset(buf_ap.release());
+   } else {
+	   perror("sysctl failed on ps_strings");
+   }
+
+   done:
+   return buf_sp;
+}
+
+#else
+
 DataBufferSP
 AuxVector::GetAuxvData()
 {
     static const size_t path_size = 128;
     static char path[path_size];
     DataBufferSP buf_sp;
+
     int fd;
 
     // Ideally, we would simply create a FileSpec and call ReadFileContents.
@@ -90,6 +147,8 @@ AuxVector::GetAuxvData()
 
     return buf_sp;
 }
+#endif
+
 
 void
 AuxVector::ParseAuxv(DataExtractor &data)

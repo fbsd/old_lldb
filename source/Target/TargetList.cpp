@@ -72,7 +72,8 @@ TargetList::CreateTarget (Debugger &debugger,
     if (!platform_sp)
         platform_sp = debugger.GetPlatformList().GetSelectedPlatform ();
 
-    ArchSpec arch;
+    // Unclear why I need to init this and others don't
+    ArchSpec arch = Host::GetArchitecture(Host::eSystemDefaultArchitecture);
     
     if (triple_cstr)
     {
@@ -83,6 +84,7 @@ TargetList::CreateTarget (Debugger &debugger,
             return error;
         }
     }
+
     error = TargetList::CreateTarget (debugger,
                                       file,
                                       arch,

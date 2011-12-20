@@ -1,0 +1,4 @@
+Debug+Asserts/
+source/Interpreter/LLDBWrapPython.cpp
+source/Interpreter/LLDBWrapPython.cpp.d
+source/LLDB_vers.c
