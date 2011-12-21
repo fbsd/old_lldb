@@ -1,6 +1,7 @@
 FreeBSD port of lldb
 ====================
 This repo contains lldb r146479 with additional FreeBSD patches.
+Details on the lldb debugger can be found on the `lldb web site`_.
 
 Checkout and build instructions
 ===============================
@@ -16,3 +17,5 @@ Build::
   % cd llvm
   % ./configure
   % gmake
+
+.. _lldb web site: http://lldb.llvm.org/
