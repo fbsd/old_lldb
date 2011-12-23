@@ -52,14 +52,15 @@
 #endif
 
 #if defined (__linux__)
-#include "Plugins/DynamicLoader/Linux-DYLD/DynamicLoaderLinuxDYLD.h"
+#include "Plugins/DynamicLoader/POSIX-DYLD/DynamicLoaderPOSIXDYLD.h"
 #include "Plugins/Platform/Linux/PlatformLinux.h"
 #include "Plugins/Process/Linux/ProcessLinux.h"
 #endif
 
 #if defined (__FreeBSD__)
-#include "Plugins/DynamicLoader/Linux-DYLD/DynamicLoaderLinuxDYLD.h"
+#include "Plugins/DynamicLoader/POSIX-DYLD/DynamicLoaderPOSIXDYLD.h"
 #include "Plugins/Platform/FreeBSD/PlatformFreeBSD.h"
+#include "Plugins/Process/POSIX/ProcessPOSIX.h"
 #include "Plugins/Process/FreeBSD/ProcessFreeBSD.h"
 #endif
 
@@ -122,12 +123,12 @@ lldb_private::Initialize ()
         //----------------------------------------------------------------------
         PlatformLinux::Initialize();
         ProcessLinux::Initialize();
-        DynamicLoaderLinuxDYLD::Initialize();
+        DynamicLoaderPOSIXDYLD::Initialize();
 #endif
 #if defined (__FreeBSD__)
         PlatformFreeBSD::Initialize();
         ProcessFreeBSD::Initialize();
-        DynamicLoaderLinuxDYLD::Initialize();
+        DynamicLoaderPOSIXDYLD::Initialize();
 #endif
         //----------------------------------------------------------------------
         // Platform agnostic plugins
@@ -194,11 +195,13 @@ lldb_private::Terminate ()
 #if defined (__linux__)
     PlatformLinux::Terminate();
     ProcessLinux::Terminate();
-    DynamicLoaderLinuxDYLD::Terminate();
+    DynamicLoaderPOSIXDYLD::Terminate();
 #endif
 
 #if defined (__FreeBSD__)
-	PlatformFreeBSD::Terminate();
+    PlatformFreeBSD::Terminate();
+    ProcessFreeBSD::Terminate();
+    DynamicLoaderPOSIXDYLD::Terminate();
 #endif
     
     DynamicLoaderStatic::Terminate();
