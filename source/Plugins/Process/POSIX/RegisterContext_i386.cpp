@@ -353,7 +353,7 @@ static unsigned GetRegSize(unsigned reg)
 
 RegisterContext_i386::RegisterContext_i386(Thread &thread,
                                                      uint32_t concrete_frame_idx)
-    : RegisterContext(thread, concrete_frame_idx)
+    : RegisterContextPOSIX(thread, concrete_frame_idx)
 {
 }
 

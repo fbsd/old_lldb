@@ -423,7 +423,7 @@ static bool IsFPR(unsigned reg)
 
 RegisterContext_x86_64::RegisterContext_x86_64(Thread &thread,
                                                          uint32_t concrete_frame_idx)
-    : RegisterContext(thread, concrete_frame_idx)
+    : RegisterContextPOSIX(thread, concrete_frame_idx)
 {
 }
 

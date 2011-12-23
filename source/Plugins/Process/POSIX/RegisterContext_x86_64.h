@@ -11,7 +11,7 @@
 #define liblldb_RegisterContext_x86_64_H_
 
 #include "lldb/Core/Log.h"
-#include "lldb/Target/RegisterContext.h"
+#include "RegisterContextPOSIX.h"
 
 #ifdef __FreeBSD__
 #include "RegisterContextFreeBSD_x86_64.h"
@@ -24,7 +24,7 @@
 class ProcessMonitor;
 
 class RegisterContext_x86_64
-  : public lldb_private::RegisterContext
+  : public RegisterContextPOSIX
 {
 public:
     RegisterContext_x86_64 (lldb_private::Thread &thread,

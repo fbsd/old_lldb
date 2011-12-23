@@ -15,9 +15,9 @@
 // Other libraries and framework includes
 // Project includes
 #include "lldb/Core/Log.h"
-#include "lldb/Target/RegisterContext.h"
+#include "RegisterContextPOSIX.h"
 
-class RegisterContext_i386 : public lldb_private::RegisterContext
+class RegisterContext_i386 : public RegisterContextPOSIX
 {
 public:
     RegisterContext_i386(lldb_private::Thread &thread,

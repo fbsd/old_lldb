@@ -16,6 +16,7 @@
 
 // Other libraries and framework includes
 #include "lldb/Target/Thread.h"
+#include "RegisterContextPOSIX.h"
 
 class ProcessMessage;
 class ProcessMonitor;
@@ -73,8 +74,11 @@ private:
     GetRegisterContextPOSIX ()
     {
         if (!m_reg_context_sp)
-            GetRegisterContext();
-        return (RegisterContextPOSIX *)m_reg_context_sp.get();
+	    m_reg_context_sp = GetRegisterContext();
+#if 0
+        return dynamic_cast<RegisterContextPOSIX*>(m_reg_context_sp.get());
+#endif
+	return (RegisterContextPOSIX *)m_reg_context_sp.get();
     }
     
     std::auto_ptr<lldb_private::StackFrame> m_frame_ap;
