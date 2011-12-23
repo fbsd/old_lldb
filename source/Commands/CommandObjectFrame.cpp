@@ -209,7 +209,7 @@ public:
                 
                 if (m_options.relative_frame_offset < 0)
                 {
-		    if (frame_idx >= (uint32_t)-m_options.relative_frame_offset)
+                    if (frame_idx >= -m_options.relative_frame_offset)
                         frame_idx += m_options.relative_frame_offset;
                     else
                     {
@@ -226,7 +226,7 @@ public:
                 }
                 else if (m_options.relative_frame_offset > 0)
                 {
-		    if (num_frames - frame_idx > (uint32_t)m_options.relative_frame_offset)
+                    if (num_frames - frame_idx > m_options.relative_frame_offset)
                         frame_idx += m_options.relative_frame_offset;
                     else
                     {
