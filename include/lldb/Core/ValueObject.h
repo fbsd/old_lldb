@@ -336,7 +336,7 @@ public:
 
     };
 
-    class EvaluationPoint 
+    class EvaluationPoint : public ExecutionContextScope
     {
     public:
         
@@ -348,9 +348,6 @@ public:
         
         ~EvaluationPoint ();
         
-        ExecutionContextScope *
-        GetExecutionContextScope ();
-                
         const lldb::TargetSP &
         GetTargetSP () const
         {
@@ -443,6 +440,20 @@ public:
             
         }
         
+        // If this EvaluationPoint is created without a target, then we could have it
+        // hand out a NULL ExecutionContextScope.  But then everybody would have to check that before
+        // calling through it, which is annoying.  So instead, we make the EvaluationPoint BE an
+        // ExecutionContextScope, and it hands out the right things.
+        virtual Target *CalculateTarget ();
+        
+        virtual Process *CalculateProcess ();
+        
+        virtual Thread *CalculateThread ();
+        
+        virtual StackFrame *CalculateStackFrame ();
+        
+        virtual void CalculateExecutionContext (ExecutionContext &exe_ctx);
+        
     private:
         bool
         SyncWithProcessState ()
@@ -479,7 +490,7 @@ public:
     ExecutionContextScope *
     GetExecutionContextScope ()
     {
-        return m_update_point.GetExecutionContextScope();
+        return &m_update_point;
     }
     
     void
@@ -696,7 +707,7 @@ public:
     void
     SetName (const ConstString &name);
     
-    lldb::addr_t
+    virtual lldb::addr_t
     GetAddressOf (bool scalar_is_load_address = true,
                   AddressType *address_type = NULL);
     
@@ -747,6 +758,18 @@ public:
     
     virtual lldb::ValueObjectSP
     AddressOf (Error &error);
+    
+    virtual lldb::addr_t
+    GetLiveAddress()
+    {
+        return LLDB_INVALID_ADDRESS;
+    }
+    
+    virtual void
+    SetLiveAddress(lldb::addr_t addr = LLDB_INVALID_ADDRESS,
+                   AddressType address_type = eAddressTypeLoad)
+    {
+    }
 
     virtual lldb::ValueObjectSP
     CastPointerType (const char *name,

@@ -59,6 +59,12 @@ public:
             AddressType address_type,
             uint8_t addr_byte_size);
 
+    static lldb::ValueObjectSP
+    Create (ExecutionContextScope *exe_scope,
+            clang::ASTContext *clang_ast,
+            Value &value,
+            const ConstString &name);
+
     // When an expression fails to evaluate, we return an error
     static lldb::ValueObjectSP
     Create (ExecutionContextScope *exe_scope,
@@ -109,11 +115,29 @@ public:
     virtual lldb::ValueObjectSP
     AddressOf (Error &error);
     
+    virtual lldb::addr_t
+    GetAddressOf (bool scalar_is_load_address = true,
+                  AddressType *address_type = NULL);
+    
     virtual size_t
     GetPointeeData (DataExtractor& data,
                     uint32_t item_idx = 0,
 					uint32_t item_count = 1);
     
+    virtual lldb::addr_t
+    GetLiveAddress()
+    {
+        return m_impl.GetLiveAddress();
+    }
+    
+    virtual void
+    SetLiveAddress(lldb::addr_t addr = LLDB_INVALID_ADDRESS,
+                   AddressType address_type = eAddressTypeLoad)
+    {
+        m_impl.SetLiveAddress(addr,
+                              address_type);
+    }
+
 protected:
     virtual bool
     UpdateValue ();
@@ -161,6 +185,11 @@ private:
                             lldb::addr_t address,
                             AddressType address_type,
                             uint8_t addr_byte_size);
+
+    ValueObjectConstResult (ExecutionContextScope *exe_scope,
+                            clang::ASTContext *clang_ast,
+                            const Value &value,
+                            const ConstString &name);
 
     ValueObjectConstResult (ExecutionContextScope *exe_scope,
                             const Error& error);

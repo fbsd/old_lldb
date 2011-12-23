@@ -33,7 +33,6 @@
 #include "lldb/Target/ExecutionContext.h"
 #include "lldb/Target/Process.h"
 #include "lldb/Target/RegisterContext.h"
-#include "lldb/Target/StopInfo.h"
 #include "lldb/Target/Target.h"
 #include "lldb/Target/Thread.h"
 
@@ -220,10 +219,11 @@ AppleObjCRuntimeV2::RunFunctionToFindClassName(addr_t object_addr, Thread *threa
     }
     
     addr_t result_ptr = void_ptr_value.GetScalar().ULongLong(LLDB_INVALID_ADDRESS);
-    size_t chars_read = m_process->ReadCStringFromMemory (result_ptr, name_dst, max_name_len);
+    Error error;
+    size_t chars_read = m_process->ReadCStringFromMemory (result_ptr, name_dst, max_name_len, error);
     
     // If we exhausted our buffer before finding a NULL we're probably off in the weeds somewhere...
-    if (chars_read == max_name_len)
+    if (error.Fail() || chars_read == max_name_len)
         return false;
     else
         return true;
@@ -298,20 +298,18 @@ AppleObjCRuntimeV2::GetDynamicTypeAndAddress (ValueObject &in_value,
                     {
                         if (sc.symbol->GetType() == eSymbolTypeObjCClass)
                             class_name = sc.symbol->GetName().GetCString();
-                        else
-                            return false;
                     }
                 }
             }
         }
         
         char class_buffer[1024];
-        if (class_name == NULL && use_dynamic != eDynamicDontRunTarget)
+        if (class_name == NULL && use_dynamic == eDynamicCanRunTarget)
         {
             // If the class address didn't point into the binary, or
             // it points into the right section but there wasn't a symbol
             // there, try to look it up by calling the class method in the target.
-            ExecutionContextScope *exe_scope = in_value.GetUpdatePoint().GetExecutionContextScope();
+            ExecutionContextScope *exe_scope = in_value.GetExecutionContextScope();
             Thread *thread_to_use;
             if (exe_scope)
                 thread_to_use = exe_scope->CalculateThread();
@@ -686,8 +684,8 @@ AppleObjCRuntimeV2::GetActualTypeName(ObjCLanguageRuntime::ObjCISA isa)
         return g_unknown;
     
     //printf("name_pointer: %llx\n", name_pointer);
-    char* cstr = new char[512];
-    if (m_process->ReadCStringFromMemory(name_pointer, cstr, 512) > 0)
+    char cstr[512];
+    if (m_process->ReadCStringFromMemory(name_pointer, cstr, sizeof(cstr), error) > 0)
     {
         if (::strstr(cstr, "NSKVONotify") == cstr)
         {

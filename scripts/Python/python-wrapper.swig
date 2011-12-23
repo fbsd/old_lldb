@@ -234,7 +234,7 @@ LLDBSwigPythonCallTypeScript
                 
                 if (pvalue != NULL)
                 {
-                    if (pvalue != Py_None)
+                    if (pvalue != Py_None && PyString_CheckExact(pvalue))
                         retval = std::string(PyString_AsString(pvalue));
                     else
                         retval = "None";
@@ -645,9 +645,11 @@ LLDBSwigPythonCallCommand
                         err_msg.clear();
                         retval = true;
                     }
-                    else // return value is an error string
+                    else
                     {
-                        err_msg.assign(PyString_AsString(pvalue));
+                        // return value is an error string
+                        if (PyString_CheckExact(pvalue))
+                            err_msg.assign(PyString_AsString(pvalue));
                         retval = false;
                     }
                     Py_DECREF (pvalue);

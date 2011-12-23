@@ -130,6 +130,15 @@ ValueObjectConstResult::Create
                                         address))->GetSP();
 }
 
+ValueObjectSP
+ValueObjectConstResult::Create (ExecutionContextScope *exe_scope,
+        clang::ASTContext *clang_ast,
+        Value &value,
+        const ConstString &name)
+{
+    return (new ValueObjectConstResult (exe_scope, clang_ast, value, name))->GetSP();
+}
+
 ValueObjectConstResult::ValueObjectConstResult
 (
     ExecutionContextScope *exe_scope,
@@ -239,6 +248,21 @@ ValueObjectConstResult::ValueObjectConstResult (
     SetIsConstant ();
 }
 
+ValueObjectConstResult::ValueObjectConstResult (
+    ExecutionContextScope *exe_scope,
+    clang::ASTContext *clang_ast,
+    const Value &value,
+    const ConstString &name) :
+    ValueObject (exe_scope),
+    m_type_name (),
+    m_byte_size (0),
+    m_clang_ast (clang_ast),
+    m_impl(this)
+{
+    m_value = value;
+    m_value.GetData(m_data);
+}
+
 ValueObjectConstResult::~ValueObjectConstResult()
 {
 }
@@ -322,6 +346,13 @@ lldb::ValueObjectSP
 ValueObjectConstResult::AddressOf (Error &error)
 {
     return m_impl.AddressOf(error);
+}
+
+lldb::addr_t
+ValueObjectConstResult::GetAddressOf (bool scalar_is_load_address,
+                                      AddressType *address_type)
+{
+    return m_impl.GetAddressOf(scalar_is_load_address, address_type);
 }
 
 ValueObject *

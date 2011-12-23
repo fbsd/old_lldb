@@ -379,7 +379,7 @@ SBTarget::AttachToProcessWithName
 )
 {
     SBProcess sb_process;
-    if (m_opaque_sp)
+    if (name && m_opaque_sp)
     {
         Mutex::Locker api_locker (m_opaque_sp->GetAPIMutex());
 
@@ -1071,13 +1071,6 @@ SBTarget::AddModule (lldb::SBModule &module)
     return false;
 }
 
-lldb::SBModule
-AddModule (const char *path,
-           const char *triple,
-           const char *uuid);
-
-
-
 uint32_t
 SBTarget::GetNumModules () const
 {
@@ -1188,7 +1181,7 @@ SBTarget::FindFunctions (const char *name,
 {
     if (!append)
         sc_list.Clear();
-    if (m_opaque_sp)
+    if (name && m_opaque_sp)
     {
         const bool symbols_ok = true;
         return m_opaque_sp->GetImages().FindFunctions (ConstString(name), 
@@ -1203,7 +1196,7 @@ SBTarget::FindFunctions (const char *name,
 lldb::SBType
 SBTarget::FindFirstType (const char* type)
 {
-    if (m_opaque_sp)
+    if (type && m_opaque_sp)
     {
         size_t count = m_opaque_sp->GetImages().GetSize();
         for (size_t idx = 0; idx < count; idx++)
@@ -1223,7 +1216,7 @@ SBTarget::FindTypes (const char* type)
     
     SBTypeList retval;
     
-    if (m_opaque_sp)
+    if (type && m_opaque_sp)
     {
         ModuleList& images = m_opaque_sp->GetImages();
         ConstString name_const(type);
@@ -1251,7 +1244,7 @@ SBTarget::FindGlobalVariables (const char *name, uint32_t max_matches)
 {
     SBValueList sb_value_list;
     
-    if (m_opaque_sp)
+    if (name && m_opaque_sp)
     {
         VariableList variable_list;
         const bool append = true;
@@ -1285,6 +1278,33 @@ SBTarget::GetSourceManager()
     return source_manager;
 }
 
+lldb::SBInstructionList
+SBTarget::GetInstructions (lldb::SBAddress base_addr, const void *buf, size_t size)
+{
+    SBInstructionList sb_instructions;
+    
+    if (m_opaque_sp)
+    {
+        Address addr;
+        
+        if (base_addr.get())
+            addr = *base_addr.get();
+        
+        sb_instructions.SetDisassembler (Disassembler::DisassembleBytes (m_opaque_sp->GetArchitecture(),
+                                                                         NULL,
+                                                                         addr,
+                                                                         buf,
+                                                                         size));
+    }
+
+    return sb_instructions;
+}
+
+lldb::SBInstructionList
+SBTarget::GetInstructions (lldb::addr_t base_addr, const void *buf, size_t size)
+{
+    return GetInstructions (ResolveLoadAddress(base_addr), buf, size);
+}
 
 SBError
 SBTarget::SetSectionLoadAddress (lldb::SBSection section,
