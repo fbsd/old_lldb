@@ -8,8 +8,8 @@ Checkout and build instructions
 
 Checkout::
 
-  % svn co -r145552 http://llvm.org/svn/llvm-project/llvm/trunk llvm
-  % svn co -r145552 http://llvm.org/svn/llvm-project/cfe/trunk llvm/tools/clang
+  % svn co -r146622 http://llvm.org/svn/llvm-project/llvm/trunk llvm
+  % svn co -r146622 http://llvm.org/svn/llvm-project/cfe/trunk llvm/tools/clang
   % git clone git@github.com:fbsd/lldb.git llvm/tools/lldb
 
 Build::
