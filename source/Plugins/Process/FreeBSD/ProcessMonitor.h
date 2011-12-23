@@ -47,7 +47,7 @@ public:
 
     /// Launches an inferior process ready for debugging.  Forms the
     /// implementation of Process::DoLaunch.
-    ProcessMonitor(ProcessFreeBSD *process,
+    ProcessMonitor(ProcessPOSIX *process,
                    lldb_private::Module *module,
                    char const *argv[],
                    char const *envp[],
@@ -56,7 +56,7 @@ public:
                    const char *stderr_path,
                    lldb_private::Error &error);
 
-    ProcessMonitor(ProcessFreeBSD *process,
+    ProcessMonitor(ProcessPOSIX *process,
                    lldb::pid_t pid,
                    lldb_private::Error &error);
 

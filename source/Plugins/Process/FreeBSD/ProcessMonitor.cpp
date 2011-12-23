@@ -29,9 +29,9 @@
 #include "lldb/Utility/PseudoTerminal.h"
 
 
-#include "FreeBSDThread.h"
+#include "POSIXThread.h"
 #include "ProcessFreeBSD.h"
-#include "ProcessFreeBSDLog.h"
+#include "ProcessPOSIXLog.h"
 #include "ProcessMonitor.h"
 
 extern "C" {
@@ -64,7 +64,7 @@ PtraceWrapper(int req, ::pid_t pid, void *addr, int data,
 {
     long int result;
 
-    LogSP log (ProcessFreeBSDLog::GetLogIfAllCategoriesSet(FREEBSD_LOG_PTRACE));
+    LogSP log (ProcessPOSIXLog::GetLogIfAllCategoriesSet(POSIX_LOG_PTRACE));
 
     if (log) {
         log->Printf("ptrace(%s, %u, %p, %x) called from file %s line %d",
@@ -657,7 +657,7 @@ ProcessMonitor::AttachArgs::~AttachArgs()
 /// launching or attaching to the inferior process, and then 2) servicing
 /// operations such as register reads/writes, stepping, etc.  See the comments
 /// on the Operation class for more info as to why this is needed.
-ProcessMonitor::ProcessMonitor(ProcessFreeBSD *process,
+ProcessMonitor::ProcessMonitor(ProcessPOSIX *process,
                                Module *module,
                                const char *argv[],
                                const char *envp[],
@@ -665,7 +665,7 @@ ProcessMonitor::ProcessMonitor(ProcessFreeBSD *process,
                                const char *stdout_path,
                                const char *stderr_path,
                                lldb_private::Error &error)
-    : m_process(process),
+	: m_process(static_cast<ProcessFreeBSD *>(process)),
       m_operation_thread(LLDB_INVALID_HOST_THREAD),
       m_monitor_thread(LLDB_INVALID_HOST_THREAD),
       m_pid(LLDB_INVALID_PROCESS_ID),
@@ -678,6 +678,7 @@ ProcessMonitor::ProcessMonitor(ProcessFreeBSD *process,
 
     args.reset(new LaunchArgs(this, module, argv, envp,
                               stdin_path, stdout_path, stderr_path));
+    
 
     // Server/client descriptors.
     if (!EnableIPC())
@@ -722,17 +723,17 @@ WAIT_AGAIN:
     }
 }
 
-ProcessMonitor::ProcessMonitor(ProcessFreeBSD *process,
+ProcessMonitor::ProcessMonitor(ProcessPOSIX *process,
                                lldb::pid_t pid,
                                lldb_private::Error &error)
-    : m_process(process),
-      m_operation_thread(LLDB_INVALID_HOST_THREAD),
-      m_monitor_thread(LLDB_INVALID_HOST_THREAD),
-      m_pid(pid),
-      m_server_mutex(Mutex::eMutexTypeRecursive),
-      m_terminal_fd(-1),
-      m_client_fd(-1),
-      m_server_fd(-1)
+	: m_process(static_cast<ProcessFreeBSD *>(process)),
+	  m_operation_thread(LLDB_INVALID_HOST_THREAD),
+	  m_monitor_thread(LLDB_INVALID_HOST_THREAD),
+	  m_pid(pid),
+	  m_server_mutex(Mutex::eMutexTypeRecursive),
+	  m_terminal_fd(-1),
+	  m_client_fd(-1),
+	  m_server_fd(-1)
 {
     std::auto_ptr<AttachArgs> args;
 
@@ -968,7 +969,7 @@ ProcessMonitor::Launch(LaunchArgs *args)
 
     // Update the process thread list with this new thread and mark it as
     // current.
-    inferior.reset(new FreeBSDThread(process, pid));
+    inferior.reset(new POSIXThread(process, pid));
     process.GetThreadList().AddThread(inferior);
 #if 0
     process.GetThreadList().SetSelectedThreadByID(pid);
@@ -1057,7 +1058,7 @@ ProcessMonitor::Attach(AttachArgs *args)
 
     // Update the process thread list with the attached thread and
     // mark it as current.
-    inferior.reset(new FreeBSDThread(process, pid));
+    inferior.reset(new POSIXThread(process, pid));
     tl.AddThread(inferior);
 #if 0
     tl.SetSelectedThreadByID(pid);

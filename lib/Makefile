@@ -81,15 +81,17 @@ ifeq ($(HOST_OS),Darwin)
 endif
 
 ifeq ($(HOST_OS),Linux)
-  USEDLIBS += lldbPluginProcessLinux.a \
-              lldbPluginDynamicLoaderLinux.a \
+  USEDLIBS += lldbPluginProcessPOSIX.a \
+	      lldbPluginProcessLinux.a \
+              lldbPluginDynamicLoaderPOSIX.a \
               lldbPluginPlatformLinux.a \
               lldbHostLinux.a
 endif
 
 ifeq ($(HOST_OS),FreeBSD)
   USEDLIBS += lldbHostFreeBSD.a \
-              lldbPluginDynamicLoaderLinux.a \
+              lldbPluginDynamicLoaderPOSIX.a \
+              lldbPluginProcessPOSIX.a \
               lldbPluginProcessFreeBSD.a \
               lldbPluginPlatformFreeBSD.a
 endif
