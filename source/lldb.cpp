@@ -128,6 +128,7 @@ lldb_private::Initialize ()
 #if defined (__FreeBSD__)
         PlatformFreeBSD::Initialize();
         ProcessFreeBSD::Initialize();
+        ProcessPOSIX::Initialize();
         DynamicLoaderPOSIXDYLD::Initialize();
 #endif
         //----------------------------------------------------------------------
