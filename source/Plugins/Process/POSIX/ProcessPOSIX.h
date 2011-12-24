@@ -26,6 +26,14 @@ class ProcessPOSIX :
     public lldb_private::Process
 {
 public:
+    //------------------------------------------------------------------
+    // Static functions.
+    //------------------------------------------------------------------
+    static void
+    Initialize();
+
+    static const char *
+    GetPluginNameStatic();
 
     //------------------------------------------------------------------
     // Constructors and destructors

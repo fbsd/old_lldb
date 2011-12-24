@@ -36,7 +36,7 @@ ProcessPOSIX::CreateInstance(Target& target, Listener &listener)
 {
     return new ProcessPOSIX(target, listener);
 }
-
+#endif
 
 void
 ProcessPOSIX::Initialize()
@@ -46,9 +46,11 @@ ProcessPOSIX::Initialize()
     if (!g_initialized)
     {
         g_initialized = true;
+#if 0
         PluginManager::RegisterPlugin(GetPluginNameStatic(),
                                       GetPluginDescriptionStatic(),
                                       CreateInstance);
+#endif
 
         Log::Callbacks log_callbacks = {
             ProcessPOSIXLog::DisableLog,
@@ -59,7 +61,12 @@ ProcessPOSIX::Initialize()
         Log::RegisterLogChannel (ProcessPOSIX::GetPluginNameStatic(), log_callbacks);
     }
 }
-#endif
+
+const char *
+ProcessPOSIX::GetPluginNameStatic()
+{
+    return "plugin.process.posix";
+}
 
 //------------------------------------------------------------------------------
 // Constructors and destructors.
