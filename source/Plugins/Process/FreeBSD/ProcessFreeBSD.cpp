@@ -47,8 +47,6 @@ ProcessFreeBSD::Initialize()
         PluginManager::RegisterPlugin(GetPluginNameStatic(),
                                       GetPluginDescriptionStatic(),
                                       CreateInstance);
-
-#ifdef notyet
         Log::Callbacks log_callbacks = {
             ProcessPOSIXLog::DisableLog,
             ProcessPOSIXLog::EnableLog,
@@ -56,7 +54,6 @@ ProcessFreeBSD::Initialize()
         };
 
         Log::RegisterLogChannel (ProcessFreeBSD::GetPluginNameStatic(), log_callbacks);
-#endif
         g_initialized = true;
     }
 }
