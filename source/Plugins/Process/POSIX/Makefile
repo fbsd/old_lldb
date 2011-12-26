@@ -14,15 +14,15 @@ BUILD_ARCHIVE = 1
 include $(LLDB_LEVEL)/../../Makefile.config
 
 # Extend the include path so we may locate UnwindLLDB.h
-CPPFLAGS += -I$(LLDB_LEVEL)/source/Plugins/Utility
+CPPFLAGS += -I$(PROJ_SRC_DIR)/$(LLDB_LEVEL)/source/Plugins/Utility
 
 ifeq ($(HOST_OS),Linux)
-CPPFLAGS += -I$(LLDB_LEVEL)/source/Plugins/Process/Linux
+CPPFLAGS += -I$(PROJ_SRC_DIR)/$(LLDB_LEVEL)/source/Plugins/Process/Linux
 endif
 
 ifeq ($(HOST_OS),FreeBSD)
 # Extend the include path so we may locate ProcessMonitor
-CPPFLAGS += -I $(LLDB_LEVEL)/source/Plugins/Process/FreeBSD
+CPPFLAGS += -I$(PROJ_SRC_DIR)/$(LLDB_LEVEL)/source/Plugins/Process/FreeBSD
 endif
 
 include $(LLDB_LEVEL)/Makefile
