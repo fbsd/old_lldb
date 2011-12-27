@@ -40,8 +40,16 @@
 class ProcessPOSIXLog
 {
     static int m_nestinglevel;
+    static const char *m_pluginname;
 
 public:
+    static void
+    RegisterPluginName(const char *pluginName)
+    {
+        m_pluginname = pluginName;
+    }
+
+
     static lldb::LogSP
     GetLogIfAllCategoriesSet(uint32_t mask = 0);
 

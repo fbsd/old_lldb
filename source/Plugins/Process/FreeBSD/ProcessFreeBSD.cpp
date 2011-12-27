@@ -54,6 +54,7 @@ ProcessFreeBSD::Initialize()
         };
 
         Log::RegisterLogChannel (ProcessFreeBSD::GetPluginNameStatic(), log_callbacks);
+        ProcessPOSIXLog::RegisterPluginName(GetPluginNameStatic());
         g_initialized = true;
     }
 }
@@ -61,7 +62,7 @@ ProcessFreeBSD::Initialize()
 const char *
 ProcessFreeBSD::GetPluginNameStatic()
 {
-    return "plugin.process.freebsd";
+    return "freebsd";
 }
 
 const char *

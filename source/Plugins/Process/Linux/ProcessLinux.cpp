@@ -56,6 +56,7 @@ ProcessLinux::Initialize()
         };
         
         Log::RegisterLogChannel (ProcessLinux::GetPluginNameStatic(), log_callbacks);
+        ProcessPOSIXLog::RegisterPluginName(GetPluginNameStatic());
     }
 }
 
@@ -83,7 +84,7 @@ ProcessLinux::Terminate()
 const char *
 ProcessLinux::GetPluginNameStatic()
 {
-    return "plugin.process.linux";
+    return "linux";
 }
 
 const char *

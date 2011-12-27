@@ -13,6 +13,7 @@
 #include "lldb/Core/StreamFile.h"
 
 #include "ProcessPOSIX.h"
+#include "ProcessPOSIXLog.h"
 
 using namespace lldb;
 using namespace lldb_private;
@@ -173,7 +174,7 @@ ProcessPOSIXLog::ListLogCategories (Stream *strm)
                   "  thread - log thread events and activities\n"
                   "  step - log step related activities\n"
                   "  verbose - enable verbose logging\n"
-                  "  watch - log watchpoint related activities\n"/*, ProcessPOSIX::GetPluginNameStatic() */);
+                  "  watch - log watchpoint related activities\n", ProcessPOSIXLog::m_pluginname);
 }
 
 
@@ -191,3 +192,4 @@ ProcessPOSIXLog::LogIf (uint32_t mask, const char *format, ...)
 }
 
 int ProcessPOSIXLog::m_nestinglevel;
+const char *ProcessPOSIXLog::m_pluginname = "";
