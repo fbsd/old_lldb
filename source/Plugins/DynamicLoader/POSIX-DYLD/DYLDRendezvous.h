@@ -174,6 +174,9 @@ public:
 protected:
     lldb_private::Process *m_process;
 
+    // Cached copy of executable pathname
+    char m_exe_path[PATH_MAX];
+
     /// Location of the r_debug structure in the inferiors address space.
     lldb::addr_t m_rendezvous_addr;
 

@@ -57,6 +57,8 @@ DYLDRendezvous::DYLDRendezvous(Process *process)
       m_added_soentries(),
       m_removed_soentries()
 {
+    // Cache a copy of the executable path
+    m_process->GetTarget().GetExecutableModule().get()->GetFileSpec().GetPath(m_exe_path, PATH_MAX);
 }
 
 bool
@@ -161,7 +163,10 @@ DYLDRendezvous::UpdateSOEntriesForAddition()
         if (!ReadSOEntryFromMemory(cursor, entry))
             return false;
 
-        if (entry.path.empty())
+        // Only add shared libraries and not the executable.
+        // On Linux this is indicated by an empty path in the entry.
+        // On FreeBSD it is the name of the executable.
+        if (entry.path.empty() || ::strcmp(entry.path.c_str(), m_exe_path) == 0)
             continue;
 
         pos = std::find(m_soentries.begin(), m_soentries.end(), entry);
@@ -210,7 +215,10 @@ DYLDRendezvous::TakeSnapshot(SOEntryList &entry_list)
         if (!ReadSOEntryFromMemory(cursor, entry))
             return false;
 
-        if (entry.path.empty())
+        // Only add shared libraries and not the executable.
+        // On Linux this is indicated by an empty path in the entry.
+        // On FreeBSD it is the name of the executable.
+        if (entry.path.empty() || ::strcmp(entry.path.c_str(), m_exe_path) == 0)
             continue;
 
         entry_list.push_back(entry);
