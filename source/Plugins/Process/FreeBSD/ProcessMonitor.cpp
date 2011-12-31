@@ -837,10 +837,6 @@ ProcessMonitor::Launch(LaunchArgs *args)
     const char *stdin_path = args->m_stdin_path;
     const char *stdout_path = args->m_stdout_path;
     const char *stderr_path = args->m_stderr_path;
-
-    lldb_utility::PseudoTerminal terminal;
-    const size_t err_len = 1024;
-    char err_str[err_len];
     lldb::pid_t pid;
 
     lldb::ThreadSP inferior;
@@ -848,21 +844,6 @@ ProcessMonitor::Launch(LaunchArgs *args)
     // Propagate the environment if one is not supplied.
     if (envp == NULL || envp[0] == NULL)
         envp = const_cast<const char **>(environ);
-
-    // Pseudo terminal setup.
-    if (!terminal.OpenFirstAvailableMaster(O_RDWR | O_NOCTTY, err_str, err_len))
-    {
-        args->m_error.SetErrorToGenericError();
-        args->m_error.SetErrorString("Could not open controlling TTY.");
-        goto FINISH;
-    }
-
-    if ((pid = terminal.Fork(err_str, err_len)) < 0)
-    {
-        args->m_error.SetErrorToGenericError();
-        args->m_error.SetErrorString("Process fork failed.");
-        goto FINISH;
-    }
 
     // Recognized child exit status codes.
     enum {
@@ -872,6 +853,8 @@ ProcessMonitor::Launch(LaunchArgs *args)
         eDupStderrFailed,
         eExecFailed
     };
+
+    pid = fork();
 
     // Child process.
     if (pid == 0)
@@ -956,9 +939,10 @@ ProcessMonitor::Launch(LaunchArgs *args)
         goto FINISH;
     }
 #endif
-    // Release the master terminal descriptor and pass it off to the
-    // ProcessMonitor instance.  Similarly stash the inferior pid.
-    monitor->m_terminal_fd = terminal.ReleaseMasterFileDescriptor();
+    // XXX - Release the master terminal descriptor and pass it off to the
+    // XXX - ProcessMonitor instance.  Similarly stash the inferior pid.
+    // For now just use stdin fd
+    monitor->m_terminal_fd = STDIN_FILENO;
     monitor->m_pid = pid;
 
     // Set the terminal fd to be in non blocking mode (it simplifies the

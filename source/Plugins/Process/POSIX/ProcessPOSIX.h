@@ -136,6 +136,10 @@ public:
     lldb_private::UnixSignals &
     GetUnixSignals();
 
+    const char *
+    GetFilePath(const lldb_private::ProcessLaunchInfo::FileAction *file_action,
+                const char *default_path);
+
 protected:
     /// Target byte order.
     lldb::ByteOrder m_byte_order;

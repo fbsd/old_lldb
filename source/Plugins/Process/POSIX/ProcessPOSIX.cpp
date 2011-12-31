@@ -121,6 +121,29 @@ ProcessPOSIX::WillLaunch(Module* module)
     return error;
 }
 
+const char *
+ProcessPOSIX::GetFilePath(
+    const lldb_private::ProcessLaunchInfo::FileAction *file_action,
+    const char *default_path)
+{
+    const char *pts_name = "/dev/pts/";
+    const char *path = NULL;
+
+    if (file_action)
+    {
+        if (file_action->GetAction () == ProcessLaunchInfo::FileAction::eFileActionOpen)
+            path = file_action->GetPath();
+            // By default the stdio paths passed in will be pseudo-terminal
+            // (/dev/pts). If so, convert to using a different default path
+            // instead to redirect I/O to the debugger console. This should
+            //  also handle user overrides to /dev/null or a different file.
+            if (::strncmp(path, pts_name, ::strlen(pts_name)) == 0)
+                path = default_path;
+    }
+
+    return path;
+}
+
 Error
 ProcessPOSIX::DoLaunch (Module *module,
                        const ProcessLaunchInfo &launch_info)
@@ -130,30 +153,21 @@ ProcessPOSIX::DoLaunch (Module *module,
 
     SetPrivateState(eStateLaunching);
 
+    const lldb_private::ProcessLaunchInfo::FileAction *file_action;
+
+    // Default of NULL will mean to use existing open file descriptors
     const char *stdin_path = NULL;
     const char *stdout_path = NULL;
     const char *stderr_path = NULL;
-    const char *working_dir = launch_info.GetWorkingDirectory();
-
-    const ProcessLaunchInfo::FileAction *file_action;
+    
     file_action = launch_info.GetFileActionForFD (STDIN_FILENO);
-    if (file_action)
-    {
-        if (file_action->GetAction () == ProcessLaunchInfo::FileAction::eFileActionOpen)
-            stdin_path = file_action->GetPath();
-    }
+    stdin_path = GetFilePath(file_action, stdin_path);
+
     file_action = launch_info.GetFileActionForFD (STDOUT_FILENO);
-    if (file_action)
-    {
-        if (file_action->GetAction () == ProcessLaunchInfo::FileAction::eFileActionOpen)
-            stdout_path = file_action->GetPath();
-    }
+    stdout_path = GetFilePath(file_action, stdout_path);
+
     file_action = launch_info.GetFileActionForFD (STDERR_FILENO);
-    if (file_action)
-    {
-        if (file_action->GetAction () == ProcessLaunchInfo::FileAction::eFileActionOpen)
-            stderr_path = file_action->GetPath();
-    }
+    stderr_path = GetFilePath(file_action, stderr_path);
 
     m_monitor = new ProcessMonitor (this, 
                                     module,
