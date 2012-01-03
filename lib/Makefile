@@ -135,7 +135,7 @@ ifeq ($(HOST_OS),FreeBSD)
     ProjLibsOptions := -Wl,--whole-archive $(ProjLibsOptions) \
                        -Wl,--no-whole-archive
     # Don't allow unresolved symbols.
-    LLVMLibsOptions += -Wl,--no-undefined
+    LLVMLibsOptions += -Wl,--allow-shlib-undefined
     # Link in python
     LD.Flags += $(PYTHON_BUILD_FLAGS) -lrt -L/usr/local/lib -lexecinfo
 endif

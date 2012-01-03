@@ -38,7 +38,7 @@
 
 
 extern "C" {
-    char **environ;
+    extern char **environ;
 }
 
 using namespace lldb;
