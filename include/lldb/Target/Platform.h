@@ -146,6 +146,10 @@ namespace lldb_private {
         virtual const char *
         GetDescription () = 0;
 
+        /// By default, launch the process by spawning and attaching.
+        virtual bool
+        CanLaunchViaAttach () { return true; }
+
         //------------------------------------------------------------------
         /// Report the current status for this platform. 
         ///

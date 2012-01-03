@@ -77,6 +77,10 @@ public:
         return GetDescriptionStatic(IsHost());
     }
 
+    /// FreeBSD processes can not be launched by spawning and attaching.
+    virtual bool
+    CanLaunchViaAttach () { return false; }
+
     //------------------------------------------------------------
     // lldb_private::Platform functions
     //------------------------------------------------------------
