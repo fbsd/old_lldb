@@ -21,10 +21,8 @@ Checkout::
 
 Patch llvm and clang with uncommitted changes needed by lldb::
 
-  % (cd llvm ; sh -c 'for i in tools/lldb/scripts/llvm*.diff; \
-     do patch -p0 -i $i; done')
-  % (cd llvm/tools/clang ; sh -c 'for i in ../lldb/scripts/clang*.diff; \
-     do echo "Patching with file $i"; patch -p0 -i $i; done')
+  % (cd llvm ; sh -c 'for i in tools/lldb/scripts/llvm*.diff; do echo "Patching with file $i"; patch -p0 -i $i; done')
+  % (cd llvm/tools/clang ; sh -c 'for i in ../lldb/scripts/clang*.diff; do echo "Patching with file $i"; patch -p0 -i $i; done')
 
 Build::
 
