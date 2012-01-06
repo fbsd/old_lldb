@@ -1462,6 +1462,7 @@ Target::EvaluateExpression
     const char *expr_cstr,
     StackFrame *frame,
     lldb_private::ExecutionPolicy execution_policy,
+    bool coerce_to_id,
     bool unwind_on_error,
     bool keep_in_memory,
     lldb::DynamicValueType use_dynamic,
@@ -1587,6 +1588,7 @@ Target::EvaluateExpression
             execution_results = ClangUserExpression::Evaluate (exe_ctx, 
                                                                execution_policy,
                                                                lldb::eLanguageTypeUnknown,
+                                                               coerce_to_id ? ClangUserExpression::eResultTypeId : ClangUserExpression::eResultTypeAny,
                                                                unwind_on_error,
                                                                expr_cstr, 
                                                                prefix, 
@@ -2306,6 +2308,8 @@ TargetInstanceSettings::UpdateInstanceSettingsVariable (const ConstString &var_n
             case eVarSetOperationAssign:
             case eVarSetOperationAppend:
                 {
+                    m_expr_prefix_contents.clear();
+
                     if (!m_expr_prefix_file.GetCurrentValue().Exists())
                     {
                         err.SetErrorToGenericError ();
@@ -2313,15 +2317,19 @@ TargetInstanceSettings::UpdateInstanceSettingsVariable (const ConstString &var_n
                         return;
                     }
             
-                    DataBufferSP file_contents = m_expr_prefix_file.GetCurrentValue().ReadFileContents();
+                    DataBufferSP file_data_sp (m_expr_prefix_file.GetCurrentValue().ReadFileContents(0, SIZE_MAX, &err));
                     
-                    if (!file_contents && file_contents->GetByteSize() == 0)
+                    if (err.Success())
                     {
-                        err.SetErrorStringWithFormat ("couldn't read data from '%s'", value);
-                        m_expr_prefix_contents.clear();
+                        if (file_data_sp && file_data_sp->GetByteSize() > 0)
+                        {
+                            m_expr_prefix_contents.assign((const char*)file_data_sp->GetBytes(), file_data_sp->GetByteSize());
+                        }
+                        else
+                        {
+                            err.SetErrorStringWithFormat ("couldn't read data from '%s'", value);
+                        }
                     }
-                    
-                    m_expr_prefix_contents.assign((const char*)file_contents->GetBytes(), file_contents->GetByteSize());
                 }
                 break;
             case eVarSetOperationClear:

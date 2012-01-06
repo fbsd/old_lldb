@@ -77,10 +77,6 @@ public:
         return GetDescriptionStatic(IsHost());
     }
 
-    /// FreeBSD processes can not be launched by spawning and attaching.
-    virtual bool
-    CanLaunchViaAttach () { return false; }
-
     //------------------------------------------------------------
     // lldb_private::Platform functions
     //------------------------------------------------------------
@@ -141,6 +137,10 @@ public:
            lldb_private::Target *target,
            lldb_private::Listener &listener,
            lldb_private::Error &error);
+
+    // FreeBSD processes can not be launched by spawning and attaching.
+    virtual bool
+    CanDebugProcess () { return false; }
 
     // Only on PlatformMacOSX:
     virtual lldb_private::Error

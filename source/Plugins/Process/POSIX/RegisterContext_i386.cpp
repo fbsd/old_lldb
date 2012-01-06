@@ -1,4 +1,4 @@
-//===-- RegisterContextLinux_i386.cpp ---------------------------*- C++ -*-===//
+//===-- RegisterContextPOSIX_i386.cpp ---------------------------*- C++ -*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //

@@ -125,7 +125,7 @@ PtraceWrapper(int req, ::pid_t pid, void *addr, int data,
 
 static size_t
 DoReadMemory(lldb::pid_t pid, lldb::addr_t vm_addr, void *buf, size_t size, 
-	     Error &error)
+             Error &error)
 {
     struct ptrace_io_desc pi_desc;
 
@@ -141,7 +141,7 @@ DoReadMemory(lldb::pid_t pid, lldb::addr_t vm_addr, void *buf, size_t size,
 
 static size_t
 DoWriteMemory(lldb::pid_t pid, lldb::addr_t vm_addr, const void *buf, 
-	      size_t size, Error &error)
+              size_t size, Error &error)
 {
     struct ptrace_io_desc pi_desc;
 
@@ -281,12 +281,12 @@ ReadRegOperation::Execute(ProcessMonitor *monitor)
     int rc;
 
     if ((rc = PTRACE(PT_GETREGS, pid, (caddr_t)&regs, 0)) < 0) {
-        m_result = false;	
+        m_result = false;
     } else {
         if (m_size == sizeof(uintptr_t))
             m_value = *(uintptr_t *)(((caddr_t)&regs) + m_offset);
-	else 
-	    memcpy(&m_value, (((caddr_t)&regs) + m_offset), m_size);
+        else 
+            memcpy(&m_value, (((caddr_t)&regs) + m_offset), m_size);
         m_result = true;
     }
 }
@@ -317,7 +317,7 @@ WriteRegOperation::Execute(ProcessMonitor *monitor)
 
     if (PTRACE(PT_GETREGS, pid, (caddr_t)&regs, 0) < 0) {
         m_result = false;
-	return;
+        return;
     }
     *(uintptr_t *)(((caddr_t)&regs) + m_offset) = (uintptr_t)m_value.GetAsUInt64();
     if (PTRACE(PT_SETREGS, pid, (caddr_t)&regs, 0) < 0)
@@ -552,11 +552,10 @@ EventMessageOperation::Execute(ProcessMonitor *monitor)
         m_result = false;
     else {
         if (plwp.pl_flags & PL_FLAG_FORKED) {
-	    m_message = (unsigned long *)plwp.pl_child_pid;
-	    m_result = true;
-	} else
-	    m_result = false;
-
+            m_message = (unsigned long *)plwp.pl_child_pid;
+            m_result = true;
+        } else
+            m_result = false;
     }
 }
 
@@ -665,7 +664,7 @@ ProcessMonitor::ProcessMonitor(ProcessPOSIX *process,
                                const char *stdout_path,
                                const char *stderr_path,
                                lldb_private::Error &error)
-	: m_process(static_cast<ProcessFreeBSD *>(process)),
+    : m_process(static_cast<ProcessFreeBSD *>(process)),
       m_operation_thread(LLDB_INVALID_HOST_THREAD),
       m_monitor_thread(LLDB_INVALID_HOST_THREAD),
       m_pid(LLDB_INVALID_PROCESS_ID),
@@ -726,14 +725,14 @@ WAIT_AGAIN:
 ProcessMonitor::ProcessMonitor(ProcessPOSIX *process,
                                lldb::pid_t pid,
                                lldb_private::Error &error)
-	: m_process(static_cast<ProcessFreeBSD *>(process)),
-	  m_operation_thread(LLDB_INVALID_HOST_THREAD),
-	  m_monitor_thread(LLDB_INVALID_HOST_THREAD),
-	  m_pid(pid),
-	  m_server_mutex(Mutex::eMutexTypeRecursive),
-	  m_terminal_fd(-1),
-	  m_client_fd(-1),
-	  m_server_fd(-1)
+    : m_process(static_cast<ProcessFreeBSD *>(process)),
+      m_operation_thread(LLDB_INVALID_HOST_THREAD),
+      m_monitor_thread(LLDB_INVALID_HOST_THREAD),
+      m_pid(pid),
+      m_server_mutex(Mutex::eMutexTypeRecursive),
+      m_terminal_fd(-1),
+      m_client_fd(-1),
+      m_server_fd(-1)
 {
     std::auto_ptr<AttachArgs> args;
 
@@ -951,13 +950,9 @@ ProcessMonitor::Launch(LaunchArgs *args)
     if (!EnsureFDFlags(monitor->m_terminal_fd, O_NONBLOCK, args->m_error))
         goto FINISH;
 
-    // Update the process thread list with this new thread and mark it as
-    // current.
+    // Update the process thread list with this new thread.
     inferior.reset(new POSIXThread(process, pid));
     process.GetThreadList().AddThread(inferior);
-#if 0
-    process.GetThreadList().SetSelectedThreadByID(pid);
-#endif
 
     // Let our process instance know the thread has stopped.
     process.SendMessage(ProcessMessage::Trace(pid));
@@ -1040,13 +1035,10 @@ ProcessMonitor::Attach(AttachArgs *args)
         goto FINISH;
     }
 
-    // Update the process thread list with the attached thread and
-    // mark it as current.
+    // Update the process thread list with the attached thread.
     inferior.reset(new POSIXThread(process, pid));
     tl.AddThread(inferior);
-#if 0
-    tl.SetSelectedThreadByID(pid);
-#endif
+
     // Let our process instance know the thread has stopped.
     process.SendMessage(ProcessMessage::Trace(pid));
 
@@ -1057,7 +1049,7 @@ ProcessMonitor::Attach(AttachArgs *args)
 bool
 ProcessMonitor::MonitorCallback(void *callback_baton,
                                 lldb::pid_t pid,
-				bool exited,
+                                bool exited,
                                 int signal,
                                 int status)
 {

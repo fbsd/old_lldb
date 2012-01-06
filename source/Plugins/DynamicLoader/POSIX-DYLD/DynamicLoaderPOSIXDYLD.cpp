@@ -80,7 +80,7 @@ DynamicLoaderPOSIXDYLD::CreateInstance(Process *process, bool force)
     {
         const llvm::Triple &triple_ref = process->GetTarget().GetArchitecture().GetTriple();
         if (triple_ref.getOS() == llvm::Triple::Linux ||
-	    triple_ref.getOS() == llvm::Triple::FreeBSD)
+            triple_ref.getOS() == llvm::Triple::FreeBSD)
             create = true;
     }
     
@@ -118,7 +118,7 @@ DynamicLoaderPOSIXDYLD::DidAttach()
         ModuleList module_list;
         module_list.Append(executable);
         UpdateLoadedSections(executable, load_offset);
-	LoadAllCurrentModules();
+        LoadAllCurrentModules();
         m_process->GetTarget().ModulesDidLoad(module_list);
     }
 }

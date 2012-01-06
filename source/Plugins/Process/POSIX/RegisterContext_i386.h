@@ -133,11 +133,10 @@ public:
         uint32_t    pad[56];
     };
 
-  /*
-   * A user area like this no longer exists on FreeBSD
-   * making this a Linux artifact. Nonetheless, it is safe
-   * leaving it here while the code is being cleaned up and generalized
-   */
+    // A user area like this no longer exists on FreeBSD
+    // making this a Linux artifact. Nonetheless, it is safe
+    // leaving it here while the code is being cleaned up and generalized.
+
     struct UserArea
     {
         GPR      regs;          // General purpose registers.

@@ -66,10 +66,6 @@ namespace lldb_private {
             return 1;
         }
 
-        /// Linux processes can not be launched by spawning and attaching.
-        virtual bool
-        CanLaunchViaAttach () { return false; }
-
         //------------------------------------------------------------
         // lldb_private::Platform functions
         //------------------------------------------------------------
@@ -108,6 +104,7 @@ namespace lldb_private {
         Attach(ProcessAttachInfo &attach_info, Debugger &debugger,
                Target *target, Listener &listener, Error &error);
 
+        // Linux processes can not be launched by spawning and attaching.
         virtual bool
         CanDebugProcess ()
         {

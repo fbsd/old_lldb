@@ -1101,8 +1101,7 @@ ProcessMonitor::Launch(LaunchArgs *args)
     if (!EnsureFDFlags(monitor->m_terminal_fd, O_NONBLOCK, args->m_error))
         goto FINISH;
 
-    // Update the process thread list with this new thread and mark it as
-    // current.
+    // Update the process thread list with this new thread.
     // FIXME: should we be letting UpdateThreadList handle this?
     // FIXME: by using pids instead of tids, we can only support one thread.
     inferior.reset(new POSIXThread(process, pid));
@@ -1167,7 +1166,6 @@ ProcessMonitor::Attach(AttachArgs *args)
 
     ProcessMonitor *monitor = args->m_monitor;
     ProcessLinux &process = monitor->GetProcess();
-
     lldb::ThreadSP inferior;
     LogSP log (ProcessPOSIXLog::GetLogIfAllCategoriesSet (POSIX_LOG_PROCESS));
 
@@ -1192,16 +1190,12 @@ ProcessMonitor::Attach(AttachArgs *args)
         goto FINISH;
     }
 
-    // Update the process thread list with the attached thread and
-    // mark it as current.
+    // Update the process thread list with the attached thread.
     inferior.reset(new POSIXThread(process, pid));
     if (log)
         log->Printf ("ProcessMonitor::%s() adding tid = %i", __FUNCTION__, pid);
     process.GetThreadList().AddThread(inferior);
-#if 0
-    /* recursive self reference in constructor doesn't work very well */
-    process.GetThreadList().SetSelectedThreadByID(pid);
-#endif
+
     // Let our process instance know the thread has stopped.
     process.SendMessage(ProcessMessage::Trace(pid));
 

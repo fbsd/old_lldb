@@ -572,45 +572,34 @@ Platform::DebugProcess (ProcessLaunchInfo &launch_info,
                         Error &error)
 {
     ProcessSP process_sp;
-
-    if (target->GetPlatform()->CanLaunchViaAttach())
+    // Make sure we stop at the entry point
+    launch_info.GetFlags ().Set (eLaunchFlagDebug);
+    error = LaunchProcess (launch_info);
+    if (error.Success())
     {
-        ProcessSP process_sp;
-        // Make sure we stop at the entry point
-        launch_info.GetFlags ().Set (eLaunchFlagDebug);
-        error = LaunchProcess (launch_info);
-        if (error.Success())
+        if (launch_info.GetProcessID() != LLDB_INVALID_PROCESS_ID)
         {
-            if (launch_info.GetProcessID() != LLDB_INVALID_PROCESS_ID)
+            ProcessAttachInfo attach_info (launch_info);
+            process_sp = Attach (attach_info, debugger, target, listener, error);
+            if (process_sp)
             {
-                ProcessAttachInfo attach_info (launch_info);
-                process_sp = Attach (attach_info, debugger, target, listener, error);
-                if (process_sp)
+                // Since we attached to the process, it will think it needs to detach
+                // if the process object just goes away without an explicit call to
+                // Process::Kill() or Process::Detach(), so let it know to kill the 
+                // process if this happens.
+                process_sp->SetShouldDetach (false);
+                
+                // If we didn't have any file actions, the pseudo terminal might
+                // have been used where the slave side was given as the file to
+                // open for stdin/out/err after we have already opened the master
+                // so we can read/write stdin/out/err.
+                int pty_fd = launch_info.GetPTY().ReleaseMasterFileDescriptor();
+                if (pty_fd != lldb_utility::PseudoTerminal::invalid_fd)
                 {
-                    // Since we attached to the process, it will think it needs
-                    // to detach if the process object just goes away without an
-                    // explicit call to  Process::Kill() or Process::Detach(),
-                    // so let it know to kill the  process if this happens.
-                    process_sp->SetShouldDetach (false);
-                    
-                    // If we didn't have any file actions, the pseudo terminal
-                    // might have been used where the slave side was given as
-                    // the file to open for stdin/out/err after we have already
-                    // opened the master so we can read/write stdin/out/err.
-                    int pty_fd = launch_info.GetPTY().ReleaseMasterFileDescriptor();
-                    if (pty_fd != lldb_utility::PseudoTerminal::invalid_fd)
-                    {
-                        process_sp->SetSTDIOFileDescriptor(pty_fd);
-                    }
+                    process_sp->SetSTDIOFileDescriptor(pty_fd);
                 }
             }
         }
-    } else {
-        launch_info.GetFlags().Set(eLaunchFlagDebug);
-        const char *plugin_name = launch_info.GetProcessPluginName();
-        process_sp = target->CreateProcess (listener, plugin_name).get();
-        error = process_sp->Launch (launch_info);
     }
-
     return process_sp;
 }

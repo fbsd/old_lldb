@@ -245,7 +245,10 @@ ClangExpressionParser::ClangExpressionParser (ExecutionContextScope *exe_scope,
     m_compiler->getLangOpts().ThreadsafeStatics = false;
     m_compiler->getLangOpts().AccessControl = false; // Debuggers get universal access
     m_compiler->getLangOpts().DollarIdents = true; // $ indicates a persistent variable name
+    
     m_compiler->getLangOpts().DebuggerSupport = true; // Features specifically for debugger clients
+    if (expr.DesiredResultType() == ClangExpression::eResultTypeId)
+        m_compiler->getLangOpts().DebuggerCastResultToId = true;
     
     // Set CodeGen options
     m_compiler->getCodeGenOpts().EmitDeclMetadata = true;
@@ -497,6 +500,8 @@ ClangExpressionParser::PrepareForExecution (lldb::addr_t &func_allocation_addr,
         
         if (execution_policy != eExecutionPolicyAlways && ir_for_target.interpretSuccess())
         {
+            if (const_result)
+                const_result->TransferAddress();
             evaluated_statically = true;
             err.Clear();
             return err;

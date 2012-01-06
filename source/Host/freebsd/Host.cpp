@@ -87,7 +87,7 @@ Host::Backtrace (Stream &strm, uint32_t max_frames)
         std::vector<void *> frame_buffer (max_frames, NULL);
         int count = ::backtrace (&frame_buffer[0], frame_buffer.size());
         ::backtrace_symbols_fd (&frame_buffer[0], count, backtrace_fd);
-        
+
         const off_t buffer_size = ::lseek(backtrace_fd, 0, SEEK_CUR);
 
         if (::lseek(backtrace_fd, 0, SEEK_SET) == 0)
@@ -187,7 +187,7 @@ GetFreeBSDProcessArgs (const ProcessInstanceInfoMatch *match_info_ptr,
             DataExtractor data (arg_data, arg_data_size, lldb::endian::InlHostByteOrder(), sizeof(void *));
             uint32_t offset = 0;
             const char *cstr;
-            
+
             cstr = data.GetCStr (&offset);
             if (cstr)
             {
@@ -197,28 +197,26 @@ GetFreeBSDProcessArgs (const ProcessInstanceInfoMatch *match_info_ptr,
                     NameMatches (process_info.GetExecutableFile().GetFilename().GetCString(),
                                  match_info_ptr->GetNameMatchType(),
                                  match_info_ptr->GetProcessInfo().GetName())))
-		    return false;
-		
+                    return false;
 
-		Args &proc_args = process_info.GetArguments();
-		while (1)
-		{
-		    const uint8_t *p = data.PeekData(offset, 1);
-		    while ((p != NULL) && (*p == '\0') && offset < arg_data_size)
-		    {
-		        ++offset;
-			p = data.PeekData(offset, 1);
-		    }
-		    if (p == NULL || offset >= arg_data_size)
-		        return true;
-		    
-		    cstr = data.GetCStr(&offset);
-		    if (cstr)
-		        proc_args.AppendArgument(cstr);
-		    else
-		        return true;
-		}
-                
+                Args &proc_args = process_info.GetArguments();
+                while (1)
+                {
+                    const uint8_t *p = data.PeekData(offset, 1);
+                    while ((p != NULL) && (*p == '\0') && offset < arg_data_size)
+                    {
+                        ++offset;
+                        p = data.PeekData(offset, 1);
+                    }
+                    if (p == NULL || offset >= arg_data_size)
+                        return true;
+
+                    cstr = data.GetCStr(&offset);
+                    if (cstr)
+                        proc_args.AppendArgument(cstr);
+                    else
+                        return true;
+                }
             }
         } 
     }
@@ -230,7 +228,7 @@ GetFreeBSDProcessCPUType (ProcessInstanceInfo &process_info)
 {
     if (process_info.ProcessIDIsValid()) {
         process_info.GetArchitecture() = Host::GetArchitecture (Host::eSystemDefaultArchitecture);
- 	return true;
+        return true;
     }
     process_info.GetArchitecture().Clear();
     return false;
@@ -259,7 +257,7 @@ GetFreeBSDProcessUserAndGroup(ProcessInstanceInfo &process_info)
                 if (proc_kinfo.ki_ngroups > 0)
                     process_info.SetEffectiveGroupID (proc_kinfo.ki_groups[0]);
                 else
-                    process_info.SetEffectiveGroupID (UINT32_MAX);            
+                    process_info.SetEffectiveGroupID (UINT32_MAX);
                 return true;
             }
         }
@@ -268,7 +266,7 @@ GetFreeBSDProcessUserAndGroup(ProcessInstanceInfo &process_info)
     process_info.SetUserID (UINT32_MAX);
     process_info.SetGroupID (UINT32_MAX);
     process_info.SetEffectiveUserID (UINT32_MAX);
-    process_info.SetEffectiveGroupID (UINT32_MAX);            
+    process_info.SetEffectiveGroupID (UINT32_MAX);
     return false;
 }
 
@@ -299,30 +297,30 @@ Host::GetAuxvData(lldb_private::Process *process)
    std::auto_ptr<DataBufferHeap> buf_ap(new DataBufferHeap(1024, 0));
 
    if (::sysctl(mib, 2, &ps_strings_addr, &ps_strings_size, NULL, 0) == 0) {
-	   pid.piod_op = PIOD_READ_D;
-	   pid.piod_addr = &ps_strings;
-	   pid.piod_offs = ps_strings_addr;
-	   pid.piod_len = sizeof(ps_strings);
-	   if (::ptrace(PT_IO, process->GetID(), (caddr_t)&pid, NULL)) {
-		   perror("failed to fetch ps_strings");
-		   buf_ap.release();
-		   goto done;
-	   }
-		   
-	   auxv_addr = ps_strings.ps_envstr + ps_strings.ps_nenvstr + 1;
-	   
-	   pid.piod_addr = aux_info;
-	   pid.piod_offs = auxv_addr;
-	   pid.piod_len = sizeof(aux_info);
-	   if (::ptrace(PT_IO, process->GetID(), (caddr_t)&pid, NULL)) {
-		   perror("failed to fetch aux_info");
-		   buf_ap.release();
-		   goto done;
-	   }
-	   memcpy(buf_ap->GetBytes(), aux_info, pid.piod_len);
-	   buf_sp.reset(buf_ap.release());
+           pid.piod_op = PIOD_READ_D;
+           pid.piod_addr = &ps_strings;
+           pid.piod_offs = ps_strings_addr;
+           pid.piod_len = sizeof(ps_strings);
+           if (::ptrace(PT_IO, process->GetID(), (caddr_t)&pid, NULL)) {
+                   perror("failed to fetch ps_strings");
+                   buf_ap.release();
+                   goto done;
+           }
+
+           auxv_addr = ps_strings.ps_envstr + ps_strings.ps_nenvstr + 1;
+
+           pid.piod_addr = aux_info;
+           pid.piod_offs = auxv_addr;
+           pid.piod_len = sizeof(aux_info);
+           if (::ptrace(PT_IO, process->GetID(), (caddr_t)&pid, NULL)) {
+                   perror("failed to fetch aux_info");
+                   buf_ap.release();
+                   goto done;
+           }
+           memcpy(buf_ap->GetBytes(), aux_info, pid.piod_len);
+           buf_sp.reset(buf_ap.release());
    } else {
-	   perror("sysctl failed on ps_strings");
+           perror("sysctl failed on ps_strings");
    }
 
    done:

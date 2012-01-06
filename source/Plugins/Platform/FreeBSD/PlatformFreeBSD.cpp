@@ -76,7 +76,7 @@ PlatformFreeBSD::Initialize ()
 void
 PlatformFreeBSD::Terminate ()
 {
-	PluginManager::UnregisterPlugin (PlatformFreeBSD::CreateInstance);
+    PluginManager::UnregisterPlugin (PlatformFreeBSD::CreateInstance);
 }
 
 //------------------------------------------------------------------
@@ -386,7 +386,6 @@ PlatformFreeBSD::GetProcessInfo (lldb::pid_t pid, ProcessInstanceInfo &process_i
     if (IsHost())
     {
         success = Platform::GetProcessInfo (pid, process_info);
-	
     }
     else if (m_remote_platform_sp) 
     {
@@ -436,10 +435,10 @@ PlatformFreeBSD::LaunchProcess (ProcessLaunchInfo &launch_info)
 
 lldb::ProcessSP
 PlatformFreeBSD::Attach(ProcessAttachInfo &attach_info,
-			Debugger &debugger,
-			Target *target,
-			Listener &listener,
-			Error &error)
+                        Debugger &debugger,
+                        Target *target,
+                        Listener &listener,
+                        Error &error)
 {
     lldb::ProcessSP process_sp;
     if (IsHost())
@@ -454,7 +453,7 @@ PlatformFreeBSD::Attach(ProcessAttachInfo &attach_info,
                                                            emptyFileSpec,
                                                            emptyArchSpec,
                                                            false,
-							   m_remote_platform_sp,
+                                                           m_remote_platform_sp,
                                                            new_target_sp);
             target = new_target_sp.get();
         }
@@ -470,7 +469,7 @@ PlatformFreeBSD::Attach(ProcessAttachInfo &attach_info,
             process_sp = target->CreateProcess (listener, "gdb-remote");
 
             if (process_sp)
-	        error = process_sp->Attach (attach_info);
+                error = process_sp->Attach (attach_info);
         }
     }
     else

@@ -110,7 +110,7 @@ ProcessMessage::PrintCrashReason(CrashReason reason)
             str = "eInvalidCrashReason";
             break;
 
-        // SIGSEGV crash rcase easons.
+        // SIGSEGV crash reasons.
         case eInvalidAddress:
             str = "eInvalidAddress";
             break;
@@ -118,7 +118,7 @@ ProcessMessage::PrintCrashReason(CrashReason reason)
             str = "ePrivilegedAddress";
             break;
 
-        // SIGILL crash rcase easons.
+        // SIGILL crash reasons.
         case eIllegalOpcode:
             str = "eIllegalOpcode";
             break;
@@ -144,7 +144,7 @@ ProcessMessage::PrintCrashReason(CrashReason reason)
             str = "eInternalStackError";
             break;
 
-        // SIGBUS crash rcase easons:
+        // SIGBUS crash reasons:
         case eIllegalAlignment:
             str = "eIllegalAlignment";
             break;
@@ -155,7 +155,7 @@ ProcessMessage::PrintCrashReason(CrashReason reason)
             str = "eHardwareError";
             break;
 
-        // SIGFPE crash rcase easons:
+        // SIGFPE crash reasons:
         case eIntegerDivideByZero:
             str = "eIntegerDivideByZero";
             break;

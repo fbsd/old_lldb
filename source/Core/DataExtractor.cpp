@@ -659,6 +659,22 @@ DataExtractor::GetMaxU64 (uint32_t *offset_ptr, uint32_t size) const
     return 0;
 }
 
+uint64_t
+DataExtractor::GetMaxU64_unchecked (uint32_t *offset_ptr, uint32_t size) const
+{
+    switch (size)
+    {
+        case 1: return GetU8_unchecked  (offset_ptr); break;
+        case 2: return GetU16_unchecked (offset_ptr); break;
+        case 4: return GetU32_unchecked (offset_ptr); break;
+        case 8: return GetU64_unchecked (offset_ptr); break;
+        default:
+            assert(!"GetMax64 unhandled case!");
+            break;
+    }
+    return 0;
+}
+
 int64_t
 DataExtractor::GetMaxS64 (uint32_t *offset_ptr, uint32_t size) const
 {
@@ -801,6 +817,12 @@ uint64_t
 DataExtractor::GetAddress (uint32_t *offset_ptr) const
 {
     return GetMaxU64 (offset_ptr, m_addr_size);
+}
+
+uint64_t
+DataExtractor::GetAddress_unchecked (uint32_t *offset_ptr) const
+{
+    return GetMaxU64_unchecked (offset_ptr, m_addr_size);
 }
 
 //------------------------------------------------------------------
@@ -1555,12 +1577,42 @@ DataExtractor::Dump (Stream *s,
         case eFormatCString:
             {
                 const char *cstr = GetCStr(&offset);
-                if (cstr)
-                    s->Printf("\"%s\"", cstr);
-                else
+                
+                if (!cstr)
                 {
                     s->Printf("NULL");
                     offset = UINT32_MAX;
+                }
+                else
+                {
+                    s->PutChar('\"');
+                    
+                    while (const char c = *cstr)
+                    {                    
+                        if (isprint(c))
+                        {
+                            s->PutChar(c);
+                        }
+                        else
+                        {
+                            switch (c)
+                            {
+                            case '\033': s->Printf ("\\e"); break;
+                            case '\a': s->Printf ("\\a"); break;
+                            case '\b': s->Printf ("\\b"); break;
+                            case '\f': s->Printf ("\\f"); break;
+                            case '\n': s->Printf ("\\n"); break;
+                            case '\r': s->Printf ("\\r"); break;
+                            case '\t': s->Printf ("\\t"); break;
+                            case '\v': s->Printf ("\\v"); break;
+                            default:   s->Printf ("\\x%2.2x", c); break;
+                            }
+                        }
+                        
+                        ++cstr;
+                    }
+                    
+                    s->PutChar('\"');
                 }
             }
             break;

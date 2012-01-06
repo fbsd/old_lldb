@@ -908,11 +908,11 @@ ClangASTContext::GetBuiltinTypeForDWARFEncodingAndBitSize (const char *type_name
     // to fix any issues we run into.
     if (type_name)
     {
-        fprintf (stderr, "error: need to add support for DW_TAG_base_type '%s' encoded with DW_ATE = 0x%x, bit_size = %u\n", type_name, dw_ate, bit_size);
+        Host::SystemLog (Host::eSystemLogError, "error: need to add support for DW_TAG_base_type '%s' encoded with DW_ATE = 0x%x, bit_size = %u\n", type_name, dw_ate, bit_size);
     }
     else
     {
-        fprintf (stderr, "error: need to add support for DW_TAG_base_type encoded with DW_ATE = 0x%x, bit_size = %u\n", dw_ate, bit_size);
+        Host::SystemLog (Host::eSystemLogError, "error: need to add support for DW_TAG_base_type encoded with DW_ATE = 0x%x, bit_size = %u\n", dw_ate, bit_size);
     }
     return NULL;
 }
@@ -5411,9 +5411,10 @@ ClangASTContext::IsIntegerType (clang_type_t clang_type, bool &is_signed)
     if (builtin_type)
     {
         if (builtin_type->isInteger())
+        {
             is_signed = builtin_type->isSignedInteger();
-        
-        return true;
+            return true;
+        }
     }
     
     return false;

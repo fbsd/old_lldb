@@ -82,7 +82,7 @@ endif
 
 ifeq ($(HOST_OS),Linux)
   USEDLIBS += lldbPluginProcessPOSIX.a \
-	      lldbPluginProcessLinux.a \
+              lldbPluginProcessLinux.a \
               lldbPluginDynamicLoaderPOSIX.a \
               lldbPluginPlatformLinux.a \
               lldbHostLinux.a
@@ -134,7 +134,7 @@ ifeq ($(HOST_OS),FreeBSD)
     # Include everything from the .a's into the shared library.
     ProjLibsOptions := -Wl,--whole-archive $(ProjLibsOptions) \
                        -Wl,--no-whole-archive
-    # Don't allow unresolved symbols.
+    # Allow unresolved symbols.
     LLVMLibsOptions += -Wl,--allow-shlib-undefined
     # Link in python
     LD.Flags += $(PYTHON_BUILD_FLAGS) -lrt -L/usr/local/lib -lexecinfo
